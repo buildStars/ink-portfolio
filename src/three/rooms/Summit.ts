@@ -95,7 +95,9 @@ export class Summit extends Room {
         c.strokeStyle = '#6f6a62';
         c.lineWidth = 6;
         c.strokeRect(14, 14, w - 28, h - 28);
-        c.font = `600 26px ${FONT_SERIF}`;
+        let ps = 26;
+        c.font = `600 ${ps}px ${FONT_SERIF}`;
+        while (c.measureText(x.period).width > w - 56 && ps > 16) c.font = `600 ${(ps -= 1)}px ${FONT_SERIF}`;
         c.fillStyle = '#2a2622';
         c.textAlign = 'center';
         c.fillText(x.period, w / 2, 62);

@@ -4,7 +4,7 @@ import type { RoomId } from './store';
  * 网址里的位置：每个房间一个地址，作品还能单独分享。
  *   /                  大门与回廊
  *   /#/gallery         作品集
- *   /#/gallery/wedding 作品集里的某件作品（content.ts 里项目的 id）
+ *   /#/gallery/mianbook 作品集里的某件作品（content.ts 里项目的 id）
  *   /#/about  /#/contact  /#/social
  * 用 # 而不是真路径：部署到任何静态托管都不用额外配置服务器。
  */

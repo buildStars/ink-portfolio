@@ -25,16 +25,22 @@ const ALWAYS =
   Array.from({ length: 0x7f - 0x20 }, (_, i) => String.fromCharCode(0x20 + i)).join('') +
   '，。、；：？！“”‘’（）《》〈〉「」『』【】…—～·';
 
-/** TS 源码里所有字符串、模板字符串的文字 */
-function tsLiterals(code: string, out: Set<string>) {
+// content.ts 里这些字段只出现在信息卡正文、悬停提示、宋体小字里（项目介绍、经历详情、自我介绍、联系方式的值…），
+// 不用毛笔字，不收进字库：简历式的长段落有上百个生僻些的字，收进来字库要大三分之一。site 里的字段照常收录
+const SERIF_FIELDS = new Set(['summary', 'description', 'detail', 'bio', 'note', 'place', 'value', 'handle', 'tags', 'period', 'year']);
+
+/** TS 源码里所有字符串、模板字符串的文字；skip 里的属性（site 对象之外）整段跳过 */
+function tsLiterals(code: string, out: Set<string>, skip?: Set<string>) {
   const file = ts.createSourceFile('x.ts', code, ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
-  const visit = (node: ts.Node) => {
+  const visit = (node: ts.Node, top: string) => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) top = node.name.text;
+    if (skip && top !== 'site' && ts.isPropertyAssignment(node) && ts.isIdentifier(node.name) && skip.has(node.name.text)) return;
     if (ts.isStringLiteralLike(node) || ts.isTemplateHead(node) || ts.isTemplateMiddle(node) || ts.isTemplateTail(node)) {
       for (const ch of node.text) out.add(ch);
     }
-    node.forEachChild(visit);
+    node.forEachChild((child) => visit(child, top));
   };
-  visit(file);
+  visit(file, '');
 }
 
 /** CSS 里引号中的文字（content: '·' 之类） */
@@ -47,7 +53,7 @@ function charsOfFile(file: string): Set<string> {
   const out = new Set<string>();
   const code = readFileSync(file, 'utf8');
   const ext = extname(file);
-  if (ext === '.ts') tsLiterals(code, out);
+  if (ext === '.ts') tsLiterals(code, out, file.endsWith(`${sep}src${sep}content.ts`) ? SERIF_FIELDS : undefined);
   else if (ext === '.css') cssStrings(code, out);
   else if (ext === '.vue') {
     const { descriptor } = parseSfc(code, { filename: file });

@@ -143,16 +143,25 @@ function sealSvg(text: string, x: number, y: number, size: number) {
   return `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${size * 0.06}" fill="${CINNABAR}"/>${glyphs}`;
 }
 
-function ogSvg(info: ShareInfo, lib: ShanShui) {
+/** 文字在毛笔字体里的实际宽度：英文字母比汉字窄得多，不能按字数估 */
+function textWidth(text: string, size: number, fontFile: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size * (text.length + 1)}" height="${size * 2}"><text x="0" y="${size * 1.5}" font-family="Ma Shan Zheng" font-size="${size}">${esc(text)}</text></svg>`;
+  const box = new Resvg(svg, { font: { fontFiles: [fontFile], loadSystemFonts: false, defaultFontFamily: 'Ma Shan Zheng' } }).getBBox();
+  return box ? box.x + box.width : [...text].length * size;
+}
+
+function ogSvg(info: ShareInfo, lib: ShanShui, fontFile: string) {
   const [W, H] = OG_SIZE;
   lib.Prng.seed(7);
   const far = lib.Mount.distMount(0, 0, 3, { hei: 180, len: 1400, seg: 5 });
   lib.Prng.seed(21);
   const near = lib.Mount.mountain(0, 0, 21, { hei: 480, wid: 520, veg: true, tex: 200 }) + lib.Mount.mountain(340, 70, 34, { hei: 280, wid: 400, veg: true, tex: 160 });
 
+  // 名字最宽 470、字号最大 150；印章紧跟在名字后面
   const name = [...info.name];
-  const nameSize = Math.min(150, 470 / Math.max(name.length, 1));
-  const nameW = name.length * nameSize;
+  const w100 = Math.max(textWidth(info.name, 100, fontFile) + name.length * 4, 1); // 字号 100 时的宽度（含字距）
+  const nameSize = Math.min(150, (470 / w100) * 100);
+  const nameW = (w100 * nameSize) / 100;
   const host = info.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
   const desc = wrap(info.description, 14, 2);
 
@@ -203,7 +212,7 @@ export async function renderShareAssets(root: string, info: ShareInfo) {
   files.set('favicon.svg', outlineText(iconSvg(iconChar, 64), font));
   files.set('favicon.ico', pngsToIco([16, 32, 48].map((size) => ({ size, data: rasterize(iconSvg(iconChar, 64), size, font) }))));
   files.set('apple-touch-icon.png', rasterize(iconSvg(iconChar, 180, true), 180, font));
-  files.set('og.png', rasterize(ogSvg(info, loadShanShui(root)), OG_SIZE[0], font));
+  files.set('og.png', rasterize(ogSvg(info, loadShanShui(root), font), OG_SIZE[0], font));
   return files;
 }
 

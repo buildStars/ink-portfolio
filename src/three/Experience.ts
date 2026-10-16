@@ -115,7 +115,7 @@ export class Experience {
 
     this.scene.background = new THREE.Color(PAPER);
     this.scene.fog = new THREE.FogExp2(PAPER, 0.024);
-    this.camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 700);
+    this.camera = new THREE.PerspectiveCamera(60, Math.max(innerWidth, 1) / Math.max(innerHeight, 1), 0.05, 700);
     this.rig = new Rig(this.camera);
 
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x8f8b84, 1.6));
@@ -413,14 +413,18 @@ export class Experience {
   }
 
   private onResize = () => {
+    // 页面在零尺寸的窗口里加载时（隐藏的 iframe、后台预加载的 webview），宽高为 0 会让画面比例变成 NaN，
+    // 画廊等按比例算出的镜头位置随之变成 NaN 且再也回不来；这种时候先当 1×1，等窗口有了尺寸再触发 resize
+    const w = Math.max(innerWidth, 1);
+    const h = Math.max(innerHeight, 1);
     const pr = this.pixelRatio();
     this.renderer.setPixelRatio(pr);
-    this.renderer.setSize(innerWidth, innerHeight);
+    this.renderer.setSize(w, h);
     this.composer.setPixelRatio(pr);
-    this.composer.setSize(innerWidth, innerHeight);
-    this.ink.uniforms.res.value.set(innerWidth * pr, innerHeight * pr);
-    this.resizePortals(innerWidth * pr, innerHeight * pr);
-    this.camera.aspect = innerWidth / innerHeight;
+    this.composer.setSize(w, h);
+    this.ink.uniforms.res.value.set(w * pr, h * pr);
+    this.resizePortals(w * pr, h * pr);
+    this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
   };
 

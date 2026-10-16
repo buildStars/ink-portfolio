@@ -98,7 +98,7 @@ export abstract class Room {
 
   click(_key: string, _obj?: THREE.Object3D) {}
 
-  /** 按网址里的条目打开详情（如 #/gallery/wedding）；没有这个条目返回 false */
+  /** 按网址里的条目打开详情（如 #/gallery/mianbook）；没有这个条目返回 false */
   openItem(_item: string): boolean {
     return false;
   }
