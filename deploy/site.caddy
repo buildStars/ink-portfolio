@@ -1,0 +1,18 @@
+# 墨园作品集：静态文件，Caddy 自动申请并续期 HTTPS 证书
+me.mianbook.ink {
+	root * /srv/ink
+	encode zstd gzip
+	file_server
+
+	# 带哈希的打包文件永久缓存；index.html、分享图等每次都向服务器确认是否更新
+	@hashed path /assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	@other not path /assets/*
+	header @other Cache-Control "no-cache"
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}

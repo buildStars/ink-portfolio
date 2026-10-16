@@ -1,0 +1,10 @@
+# 放在服务器 /opt/handbook/ 下。服务器只有一组 80/443 端口，由 handbook 的 Caddy 占着，
+# 作品集（me.mianbook.ink）就挂在同一个 Caddy 上。
+# docker compose 会自动合并本文件；handbook 重新部署只覆盖 compose.yml 和 Caddyfile，不会动这里。
+services:
+  caddy:
+    command: caddy run --config /etc/caddy/Caddyfile.main --adapter caddyfile
+    volumes:
+      - ./Caddyfile.main:/etc/caddy/Caddyfile.main:ro
+      - /opt/ink-portfolio/caddy:/etc/caddy/sites:ro
+      - /opt/ink-portfolio/www:/srv/ink:ro

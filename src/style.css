@@ -1,0 +1,166 @@
+/* 毛笔字：构建时只保留页面用到的字（build/brushFont.ts 生成），整套 2.7MB 的字库缩到一两百 KB */
+@font-face {
+  font-family: 'Ma Shan Zheng';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/brush.woff2') format('woff2');
+}
+
+:root {
+  --paper: #ece6d8;
+  --paper-light: #f4efe2;
+  --ink: #161616;
+  --ink-soft: #3a3633;
+  --ink-faint: #7a7166;
+  --cinnabar: #b8281d;
+  --brush: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', serif;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'Noto Serif SC', serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 3D 正常运行时整页不滚动；不支持 WebGL（.nogl）时显示可滚动的文字版 */
+.js:not(.nogl),
+.js:not(.nogl) body,
+.js:not(.nogl) #app {
+  height: 100%;
+  overflow: hidden;
+}
+
+.nogl #app {
+  display: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+.stage canvas {
+  display: block;
+}
+
+/* 题签：叠在 3D 画面上的网页文字，不经过水墨滤镜，始终清晰；不挡滚动和点击 */
+.scene-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scene-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.2em 0.65em 0.28em;
+  background: rgba(244, 239, 226, 0.94);
+  border: 1.5px solid var(--ink);
+  box-shadow: 2px 3px 0 rgba(22, 22, 22, 0.12);
+  color: var(--ink);
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+  will-change: transform;
+}
+
+.scene-label .t {
+  font-family: var(--brush);
+  font-size: 1em;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+}
+
+.scene-label .s {
+  font-family: var(--serif);
+  font-size: max(0.65em, 12px);
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.scene-label.hidden {
+  opacity: 0;
+}
+
+/* 朱红印章风格按钮 */
+.seal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  padding: 0.5em 1.4em;
+  border: 0;
+  background: var(--cinnabar);
+  color: var(--paper-light);
+  font-family: var(--brush);
+  font-size: 1.25rem;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+  clip-path: polygon(1% 4%, 99% 0, 100% 96%, 0 100%);
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.seal-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+/* 细墨线按钮 */
+.ink-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.35em 0.9em;
+  border: 1.5px solid var(--ink);
+  background: rgba(244, 239, 226, 0.85);
+  font-family: var(--brush);
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ink-btn:hover {
+  background: var(--ink);
+  color: var(--paper-light);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

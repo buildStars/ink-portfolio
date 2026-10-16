@@ -1,0 +1,3 @@
+# Caddy 的入口（由 compose.override.yml 指定）：先载入 handbook 自己的 Caddyfile，再载入其他站点
+import /etc/caddy/Caddyfile
+import /etc/caddy/sites/*.caddy

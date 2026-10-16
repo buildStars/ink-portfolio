@@ -1,0 +1,8 @@
+node_modules
+dist
+*.local
+.DS_Store
+# 构建时按页面用字生成的毛笔字库（build/brushFont.ts）
+src/fonts/
+# 录制的宣传片与分镜预览（npm run dev 后按 README 重新生成，不进仓库）
+/promo/
